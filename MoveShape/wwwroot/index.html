@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SignalR Move Shape</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        #shape {
+            width: 100px;
+            height: 100px;
+            background-color: red;
+            position: absolute;
+            border-radius: 50%;
+            cursor: move; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            transition: background-color 0.3s;
+        }
+
+            #shape:hover {
+                background-color: #ff6347; /* تغيير لون الخلفية عند تحويل الماوس إليه */
+            }
+    </style>
+
+</head>
+
+<body>
+    <div id="shape"></div>
+    <!-- Script references -->
+    <!-- Reference the jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Reference the jQuery UI library -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <!-- Reference the SignalR library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <!-- Add script to update the page and send messages -->
+    <script type="text/javascript">
+        $(function () {
+            // Declare a proxy to reference the hub
+            var connection = new signalR.HubConnectionBuilder().withUrl("/moveShapeHub").build();
+            connection.on("updateShape", function (model) {
+                $("#shape").animate({ left: model.left + "px", top: model.top + "px" }, 500);
+            });
+
+            // Start the connection
+            connection.start().then(function () {
+                $("#shape").draggable({
+                    drag: function (event, ui) {
+                        connection.invoke("updateModel", { left: ui.position.left, top: ui.position.top });
+                    }
+                });
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+    </script>
+</body>
+
+</html>
